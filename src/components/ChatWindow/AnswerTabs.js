@@ -5,7 +5,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import DOMPurify from 'dompurify';
 
-// Error Boundary Component
+
 class ErrorBoundary extends React.Component {
   state = { hasError: false, error: null };
   
@@ -30,7 +30,7 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-// Markdown Component with Sanitization
+
 const MarkdownContent = ({ content }) => {
   const cleanContent = DOMPurify.sanitize(content || '');
   return (
@@ -61,12 +61,12 @@ const MarkdownContent = ({ content }) => {
   );
 };
 
-// Main Component
+
 const AnswerTabs = ({ responseData, isLoading }) => {
   const [activeTab, setActiveTab] = useState('final');
   const [tabs, setTabs] = useState([]);
 
-  // Update available tabs when data changes
+  
   useEffect(() => {
     if (responseData) {
       const availableTabs = ['final', 'rag', 'llm', 'web', 'sources'].filter(tab => {
@@ -75,14 +75,14 @@ const AnswerTabs = ({ responseData, isLoading }) => {
       });
       setTabs(availableTabs);
       
-      // Reset to first tab if current tab becomes invalid
+      
       if (!availableTabs.includes(activeTab)) {
         setActiveTab(availableTabs[0] || null);
       }
     }
   }, [responseData, activeTab]);
 
-  // Keyboard navigation
+  
   const handleKeyDown = (e) => {
     if (['ArrowRight', 'ArrowLeft'].includes(e.key)) {
       const currentIndex = tabs.indexOf(activeTab);
@@ -92,7 +92,7 @@ const AnswerTabs = ({ responseData, isLoading }) => {
     }
   };
 
-  // Content rendering
+  
   const renderContent = () => {
     if (!responseData) return null;
     
@@ -207,7 +207,7 @@ const AnswerTabs = ({ responseData, isLoading }) => {
   );
 };
 
-// Helper function
+
 const isValidUrl = (url) => {
   try {
     new URL(url);
@@ -217,7 +217,7 @@ const isValidUrl = (url) => {
   }
 };
 
-// Prop validation
+
 AnswerTabs.propTypes = {
   responseData: PropTypes.shape({
     final: PropTypes.string,
