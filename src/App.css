@@ -1,0 +1,569 @@
+/* src/App.css */
+
+/* 1. Define CSS Variables & Base Font Size */
+:root {
+  /* Base font size */
+  font-size: 16px; /* Base size, adjust if needed */
+
+  /* Light Theme (Default) */
+  --bg-color: #ffffff;
+  --bg-secondary-color: #f8f9fa;
+  --bg-sidebar-color: #e9ecef;
+  --text-color: #212529;
+  --text-muted-color: #6c757d;
+  --border-color: #dee2e6;
+  --link-color: #007bff;
+  --link-hover-color: #0056b3;
+  --primary-color: #007bff;
+  --primary-text-color: #ffffff;
+  --secondary-color: #6c757d;
+  --secondary-text-color: #ffffff;
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --danger-text-color: #ffffff;
+  --code-bg-color: #f1f1f1;
+  --code-text-color: #333;
+  --code-block-bg-color: #282c34; /* From react-syntax-highlighter oneDark */
+  --code-block-text-color: #abb2bf; /* From react-syntax-highlighter oneDark */
+  --message-user-bg: #007bff;
+  --message-user-text: #ffffff;
+  --message-assistant-bg: #e9ecef;
+  --message-assistant-text: #212529;
+  --message-error-bg: #f8d7da;
+  --message-error-text: #721c24;
+  --message-error-border: #f5c6cb;
+  --input-bg: #ffffff;
+  --input-border: #ced4da;
+  --input-text: #495057;
+  --tab-active-border: #007bff;
+  --scrollbar-thumb-bg: #c1c1c1;
+  --scrollbar-track-bg: #f1f1f1;
+}
+
+body.theme-dark {
+  /* Dark Theme Overrides */
+  --bg-color: #1a1a1a;
+  --bg-secondary-color: #2c2c2c;
+  --bg-sidebar-color: #212121;
+  --text-color: #e0e0e0;
+  --text-muted-color: #a0a0a0;
+  --border-color: #444444;
+  --link-color: #58a6ff;
+  --link-hover-color: #8cc1ff;
+  --primary-color: #58a6ff;
+  --primary-text-color: #1a1a1a;
+  --secondary-color: #8b949e;
+  --secondary-text-color: #1a1a1a;
+  --success-color: #3fb950;
+  --danger-color: #f85149;
+  --danger-text-color: #ffffff;
+  --code-bg-color: #333333;
+  --code-text-color: #e0e0e0;
+  --code-block-bg-color: #1c1c1c;
+  --code-block-text-color: #d4d4d4;
+  --message-user-bg: #303f9f;
+  --message-user-text: #e0e0e0;
+  --message-assistant-bg: #333333;
+  --message-assistant-text: #e0e0e0;
+  --message-error-bg: #582a2f;
+  --message-error-text: #ffa1a1;
+  --message-error-border: #a13e44;
+  --input-bg: #2c2c2c;
+  --input-border: #444444;
+  --input-text: #e0e0e0;
+  --tab-active-border: #58a6ff;
+  --scrollbar-thumb-bg: #555555;
+  --scrollbar-track-bg: #2c2c2c;
+}
+
+/* 2. Apply Variables and Base Styles */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+               'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+               sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  line-height: 1.5;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+/* Apply scrollbar styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-bg);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted-color);
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+               monospace;
+}
+
+/* --- Main Layout Container --- */
+.app-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden; /* Prevents whole page scroll, crucial for layout */
+}
+
+/* --- Sidebar Styling --- */
+.sidebar {
+  width: 280px; /* Fixed width */
+  flex-shrink: 0; /* Prevents sidebar from shrinking when chat content grows */
+  background-color: var(--bg-sidebar-color);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border-color);
+  overflow-y: auto; /* Allows sidebar itself to scroll if needed */
+  transition: background-color 0.2s ease-in-out;
+}
+
+.sidebar h2 {
+  margin-top: 0;
+  color: var(--primary-color);
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.sidebar h4 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-muted-color);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sidebar hr {
+  border: 0;
+  border-top: 1px solid var(--border-color);
+  margin: 1rem 0;
+}
+
+/* General sidebar input/button styling */
+.sidebar select,
+.sidebar input[type="file"],
+.sidebar button {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  box-sizing: border-box;
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  font-size: 0.95rem;
+}
+
+/* Specific sidebar action buttons */
+.sidebar button:not(.delete-chat-btn):not(.theme-toggle-btn) {
+  background-color: var(--primary-color);
+  color: var(--primary-text-color);
+  cursor: pointer;
+  border: none;
+  font-weight: 500;
+}
+.sidebar button:disabled:not(.delete-chat-btn):not(.theme-toggle-btn) {
+  background-color: var(--secondary-color);
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+  background-color: var(--bg-secondary-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  cursor: pointer;
+  text-align: center;
+  margin-top: auto; /* Push to bottom */
+  margin-bottom: 0;
+  padding: 8px;
+  font-size: 0.9rem;
+}
+.theme-toggle-btn:hover {
+   opacity: 0.9;
+}
+
+/* Chat List */
+.chat-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 300px; /* Limit height */
+  overflow-y: auto; /* Scroll if list exceeds max height */
+}
+.chat-list li {
+  padding: 10px 8px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  word-break: break-word;
+  transition: background-color 0.1s ease-in-out;
+  border-radius: 3px;
+  margin-bottom: 2px;
+}
+.chat-list li:hover {
+  background-color: var(--bg-secondary-color);
+}
+.chat-list li.active {
+  background-color: var(--primary-color);
+  color: var(--primary-text-color);
+  font-weight: 500;
+}
+.chat-list li.active:hover {
+  background-color: var(--primary-color);
+}
+.chat-list li.active .delete-chat-btn {
+  color: var(--primary-text-color);
+  opacity: 0.7;
+}
+.chat-list li.active .delete-chat-btn:hover {
+  opacity: 1;
+}
+.delete-chat-btn {
+  background: none;
+  border: none;
+  color: var(--danger-color);
+  cursor: pointer;
+  font-size: 1.3em;
+  padding: 0 5px;
+  margin-left: 8px;
+  line-height: 1;
+  opacity: 0.7;
+}
+.delete-chat-btn:hover {
+   opacity: 1;
+}
+
+
+/* --- Chat Window Styling --- */
+.chat-window {
+  flex-grow: 1; /* Takes remaining space */
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-color);
+  transition: background-color 0.2s ease-in-out;
+  overflow: hidden; /* Clips content, prevents affecting sibling (sidebar) layout */
+}
+
+.chat-header {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-secondary-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0; /* Prevent header from shrinking */
+}
+.chat-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text-color);
+}
+.chat-subject-badge {
+  background-color: var(--secondary-color);
+  color: var(--secondary-text-color);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* Message List Area */
+.message-list {
+  flex-grow: 1; /* Takes available vertical space */
+  overflow-y: auto; /* Handles scrolling of messages and tabs */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Placeholders */
+.message-list-placeholder,
+.chat-placeholder {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: var(--text-muted-color);
+  padding: 20px;
+}
+.chat-placeholder h2 {
+  color: var(--text-color);
+}
+
+/* Individual Message Bubbles */
+.message {
+  margin-bottom: 1rem;
+  max-width: 80%;
+  display: flex;
+  flex-direction: column;
+  overflow: visible; /* Added to ensure tabs visibility */
+}
+.message-content {
+  padding: 10px 15px;
+  border-radius: 18px;
+  word-wrap: break-word;
+  line-height: 1.5;
+  font-size: 1rem;
+}
+
+/* Code Styling within Messages */
+.message-content pre {
+  background-color: var(--code-block-bg-color) !important;
+  color: var(--code-block-text-color) !important;
+  padding: 12px 15px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 0.95em;
+  margin: 8px 0;
+  border: 1px solid var(--border-color);
+}
+.message-content code:not(pre code) {
+   background-color: var(--code-bg-color);
+   color: var(--code-text-color);
+   padding: 0.2em 0.5em;
+   border-radius: 4px;
+   font-size: 0.9em;
+   border: 1px solid var(--border-color);
+}
+
+/* User/Assistant Message Alignment & Colors */
+.user-message {
+  align-self: flex-end;
+  margin-left: auto;
+}
+.user-message .message-content {
+  background-color: var(--message-user-bg);
+  color: var(--message-user-text);
+  border-bottom-right-radius: 5px; /* Bubble tail */
+}
+.assistant-message {
+  align-self: flex-start;
+  margin-right: auto;
+}
+.assistant-message .message-content {
+  background-color: var(--message-assistant-bg);
+  color: var(--message-assistant-text);
+  border-bottom-left-radius: 5px; /* Bubble tail */
+}
+.assistant-message .message-content a { /* Link color inside assistant msg */
+  color: var(--link-color);
+}
+.assistant-message .message-content a:hover {
+  color: var(--link-hover-color);
+}
+
+/* Error Message Styling */
+.assistant-message.error-message .message-content {
+  background-color: var(--message-error-bg);
+  color: var(--message-error-text);
+  border: 1px solid var(--message-error-border);
+}
+
+/* Typing Indicator */
+.typing-indicator .message-content {
+  font-style: italic;
+  color: var(--text-muted-color);
+  background-color: transparent;
+  padding: 5px 0;
+  display: flex;
+  align-items: center;
+}
+.typing-indicator .message-content > div { /* Spinner inside */
+  margin-right: 8px;
+}
+
+/* --- Answer Tabs Styling (Below Assistant Message) --- */
+.answer-tabs {
+  position: relative;
+  margin-top: 10px;
+  width: 100%;
+  max-width: 100% !important; /* Override any previous max-width */
+  z-index: 2;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--bg-secondary-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Row of Tab Buttons */
+.tab-buttons {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-sidebar-color);
+}
+
+/* Individual Tab Button */
+.tab-buttons button {
+  padding: 8px 15px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--text-muted-color);
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.2s ease, border-color 0.2s ease;
+  /* UPDATED: Make buttons more prominent */
+  font-weight: 500;
+}
+.tab-buttons button.active {
+  font-weight: 600;
+  color: var(--primary-color);
+  border-bottom-color: var(--tab-active-border);
+  /* UPDATED: Make active tab more prominent */
+  background-color: rgba(0, 0, 0, 0.05);
+}
+.tab-buttons button:hover:not(.active) {
+  /* UPDATED: Added hover effect for better user experience */
+  background-color: rgba(0, 0, 0, 0.03);
+  color: var(--text-color);
+}
+.tab-buttons button:disabled {
+  color: var(--text-muted-color);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Tab Content Area */
+.tab-content {
+  padding: 15px;
+  font-size: 0.95rem;
+  max-height: 300px; /* Increased from 250px */
+  overflow-y: auto;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+/* Styling for content inside tabs */
+.tab-content ul {
+  padding-left: 20px;
+  margin-top: 5px;
+}
+.tab-content li {
+  margin-bottom: 5px;
+}
+.tab-content a {
+  color: var(--link-color);
+  word-break: break-all;
+}
+.tab-content a:hover {
+  color: var(--link-hover-color);
+}
+.tab-content pre { /* Code blocks inside tabs */
+  background-color: var(--code-block-bg-color) !important;
+  color: var(--code-block-text-color) !important;
+  padding: 10px 12px;
+  border-radius: 5px;
+  font-size: 0.9em;
+  border: 1px solid var(--border-color);
+  overflow-x: auto; /* Horizontal scroll for code */
+}
+.tab-content code:not(pre code) { /* Inline code inside tabs */
+  background-color: var(--code-bg-color);
+  color: var(--code-text-color);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 0.9em;
+  border: 1px solid var(--border-color);
+}
+
+
+/* --- Chat Input Area Styling --- */
+.chat-input-area {
+  display: flex;
+  padding: 15px 20px;
+  border-top: 1px solid var(--border-color);
+  background-color: var(--bg-secondary-color);
+  flex-shrink: 0; /* Prevent input area from shrinking */
+}
+
+.chat-input-area textarea {
+  flex-grow: 1;
+  padding: 12px 15px;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  resize: none;
+  margin-right: 10px;
+  font-size: 1rem;
+  line-height: 1.5;
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  min-height: 50px;
+}
+.chat-input-area textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Send Button */
+.chat-input-area button {
+  padding: 0 20px;
+  background-color: var(--success-color);
+  color: var(--primary-text-color);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0; /* Prevent button from shrinking */
+}
+.chat-input-area button:disabled {
+  background-color: var(--secondary-color);
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* --- Error Display Styling --- */
+.error-display {
+  background-color: var(--message-error-bg);
+  color: var(--message-error-text);
+  border: 1px solid var(--message-error-border);
+  padding: 10px 15px;
+  margin: 10px 0;
+  border-radius: 4px;
+  position: relative;
+  font-size: 0.95rem;
+}
+.error-display button { /* Close button */
+  position: absolute;
+  top: 5px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: var(--message-error-text);
+  font-size: 1.2em;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 5px;
+  line-height: 1;
+  opacity: 0.7;
+}
+.error-display button:hover {
+  opacity: 1;
+}
+
+/* Loading Spinner - Needs no specific override unless color clashes in dark mode */
