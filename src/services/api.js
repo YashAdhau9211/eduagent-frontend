@@ -217,15 +217,31 @@ export const uploadKnowledgeBase = async (subject, files) => {
     files.forEach(file => {
         formData.append('files', file);
     });
-    // Interceptor will add token if user is logged in
-    const response = await apiClient.post(`/subjects/${encodeURIComponent(subject)}/kb/`, formData, {
-        headers: {
-            // Axios handles Content-Type for FormData automatically, but override if needed
-            // 'Content-Type': 'multipart/form-data', (Usually not needed)
-        },
-    });
-    return response.data;
+
+    console.log(`[uploadKnowledgeBase] Uploading ${files.length} files for subject: ${subject}`);
+
+    try {
+        // *** Explicitly try overriding Content-Type to let browser set it ***
+        const response = await apiClient.post(
+            `/subjects/${encodeURIComponent(subject)}/kb/`,
+            formData,
+            {
+                headers: {
+                    // Setting to undefined or null might force browser/axios default for FormData
+                    'Content-Type': undefined
+                    // OR try: 'Content-Type': null
+                }
+            }
+        );
+
+        console.log("KB Upload Response:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("KB Upload Failed:", error?.message || error);
+        throw error;
+    }
 };
+
 
 export const fetchChats = async () => {
     // Interceptor will add token
