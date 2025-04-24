@@ -1,12 +1,65 @@
-// src/context/reducer.js
-
 export const reducer = (state, action) => {
     
     console.log("Dispatching:", action.type, action.payload);
 
     switch (action.type) {
 
-        
+        // --- Auth Actions ---
+        case 'AUTH_START': // Generic start for login/signup/load_user
+            return { ...state, isLoadingAuth: true, authError: null };
+        case 'LOGIN_SUCCESS':
+            localStorage.setItem('eduagent-access-token', action.payload.token);
+            // localStorage.setItem('eduagent-refresh-token', action.payload.refreshToken); // If using refresh tokens
+            return {
+                ...state,
+                isLoadingAuth: false,
+                isAuthenticated: true,
+                authToken: action.payload.token,
+                user: action.payload.user, // Assume payload includes { token, user }
+                authError: null,
+            };
+        case 'LOAD_USER_SUCCESS': // After verifying token on page load
+            return {
+                ...state,
+                isLoadingAuth: false,
+                isAuthenticated: true,
+                user: action.payload.user, // Assume payload includes { user }
+                authError: null,
+            };
+        case 'AUTH_FAIL': // Generic fail for login/signup/load_user
+             localStorage.removeItem('eduagent-access-token');
+             // localStorage.removeItem('eduagent-refresh-token');
+             return {
+                 ...state,
+                 isLoadingAuth: false,
+                 isAuthenticated: false,
+                 authToken: null,
+                 user: null,
+                 authError: action.payload, // Error message/object
+             };
+         case 'LOGOUT':
+             localStorage.removeItem('eduagent-access-token');
+             // localStorage.removeItem('eduagent-refresh-token');
+             return {
+                 ...state,
+                 isAuthenticated: false,
+                 authToken: null,
+                 user: null,
+                 selectedSubject: null,
+                 chats: [],
+                 currentChatId: null,
+                 currentChatHistory: [],
+             };
+        case 'SIGNUP_SUCCESS': // May or may not log user in automatically
+             return {
+                 ...state,
+                 isLoadingAuth: false,
+                 authError: null,
+                 isAuthenticated: true 
+             };
+        // --- End Auth Actions ---
+
+
         case 'TOGGLE_THEME': {
             const newTheme = state.theme === 'light' ? 'dark' : 'light';
             localStorage.setItem('eduagent-theme', newTheme); 

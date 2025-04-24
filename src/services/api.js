@@ -1,33 +1,215 @@
 import axios from 'axios';
 
+// Base URL for your API endpoints (including the /api prefix)
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://127.0.0.1:8000/api';
+// Base URL for Auth endpoints (assuming they might be outside /api, adjust if needed)
+// If auth endpoints ARE under /api (e.g., /api/auth/login/), you can just use API_BASE_URL for everything.
+const AUTH_BASE_URL = process.env.REACT_APP_AUTH_BASE_URL || 'http://127.0.0.1:8000'; // Example: Root URL
 
 const apiClient = axios.create({
+    // Use API_BASE_URL for general API calls
     baseURL: API_BASE_URL,
     headers: {
         'Content-Type': 'application/json',
     },
 });
 
+// --- Request Interceptor ---
+// Runs before every request is sent
+apiClient.interceptors.request.use(
+    (config) => {
+        // Get the token from localStorage
+        const token = localStorage.getItem('eduagent-access-token');
 
+        // Define URLs that should NOT receive the Authorization header
+        const publicUrls = [
+            `${AUTH_BASE_URL}/auth/login/`, // Adjust path based on your backend router
+            `${AUTH_BASE_URL}/auth/register/`, // Adjust path based on your backend router
+            // Add refresh token URL if you implement it:
+            // `${AUTH_BASE_URL}/auth/token/refresh/`,
+        ];
+
+        // Construct the full URL for comparison
+        const fullUrl = config.baseURL && !config.url?.startsWith('http')
+            ? `${config.baseURL}${config.url}`
+            : config.url;
+
+        // Check if the token exists and if the request URL is not public
+        if (token && !publicUrls.some(url => fullUrl?.startsWith(url))) {
+             console.log(`[API Interceptor] Adding token to request for: ${config.url}`); // Debug log
+             config.headers['Authorization'] = `Bearer ${token}`;
+        } else {
+            // console.log(`[API Interceptor] No token added for: ${config.url}`); // Debug log
+        }
+
+        return config; // Return the modified config
+    },
+    (error) => {
+        // Handle request errors (e.g., network issues before sending)
+        console.error("API Request Interceptor Error:", error);
+        return Promise.reject(error);
+    }
+);
+
+
+// --- Response Interceptor ---
+// Handles responses globally (keeps existing error formatting)
 apiClient.interceptors.response.use(
-    response => response,
+    response => response, // Pass through successful responses
     error => {
-        
-        console.error("API call error:", error.response || error.message || error);
-        
+        // Log the raw error object for detailed debugging if needed
+        console.error("API call error Raw:", error);
+        // Log the response data if available
+        console.error("API call error Response Data:", error.response?.data);
+
+        let errorMessage = "An unexpected error occurred."; // Default message
+
+        // --- Improved Error Message Extraction ---
+        if (error.response?.data) {
+            const responseData = error.response.data;
+
+            // 1. Check for 'detail' (common for non-field auth errors like bad credentials)
+            if (responseData.detail) {
+                errorMessage = responseData.detail;
+            }
+            // 2. Check for 'non_field_errors' (common for DRF form validation)
+            else if (responseData.non_field_errors && Array.isArray(responseData.non_field_errors)) {
+                errorMessage = responseData.non_field_errors.join(' '); // Join multiple non-field errors
+            }
+            // 3. Check if it's an object (likely field-specific validation errors)
+            else if (typeof responseData === 'object') {
+                const fieldErrors = [];
+                for (const key in responseData) {
+                    // Check if the value for the key is an array (standard DRF error format)
+                    if (Array.isArray(responseData[key])) {
+                        // Format as "Field: error1 error2"
+                        // Capitalize field name for better readability
+                        const fieldName = key.charAt(0).toUpperCase() + key.slice(1);
+                        fieldErrors.push(`${fieldName}: ${responseData[key].join(' ')}`);
+                    }
+                    // Handle cases where the error might be a simple string under the key
+                    else if (typeof responseData[key] === 'string') {
+                         const fieldName = key.charAt(0).toUpperCase() + key.slice(1);
+                         fieldErrors.push(`${fieldName}: ${responseData[key]}`);
+                    }
+                }
+                // If we found field errors, join them
+                if (fieldErrors.length > 0) {
+                    errorMessage = fieldErrors.join('; ');
+                }
+                // As a fallback for objects, check for a simple 'error' key
+                else if (responseData.error && typeof responseData.error === 'string') {
+                     errorMessage = responseData.error;
+                }
+                // If it's an object but we couldn't parse specific errors, maybe stringify it? (Less ideal)
+                // else { errorMessage = JSON.stringify(responseData); }
+            }
+            // 4. Check if the response data itself is just a plain string error
+            else if (typeof responseData === 'string') {
+                 errorMessage = responseData;
+            }
+        }
+        // 5. Fallback to generic Axios error message if no response data
+        else if (error.message) {
+            errorMessage = error.message; // e.g., "Network Error"
+        }
+        // --- End Improved Error Message Extraction ---
+
+        // Log the final formatted message for debugging
+        console.error("API call error Formatted Message:", errorMessage);
+
+        // Reject the promise with a structured error object including the formatted message
         return Promise.reject({
-            message: error.response?.data?.error || error.response?.data?.detail || 'An unexpected error occurred',
+            message: errorMessage, // Use the extracted/formatted message
             status: error.response?.status,
-            data: error.response?.data
+            data: error.response?.data // Keep original data if needed elsewhere
         });
     }
 );
 
 
+// --- Authentication API Functions ---
+
+/**
+ * Logs in a user.
+ * @param {object} credentials - { username, password }
+ * @returns {Promise<{token: string, user: object}>} - Object containing access token and user details.
+ * @throws {Error} If login fails.
+ */
+export const loginUser = async (credentials) => {
+    // Assuming login endpoint is at /auth/login/ relative to AUTH_BASE_URL
+    // Adjust URL path if your backend structure is different
+    const response = await axios.post(`${AUTH_BASE_URL}/auth/login/`, credentials, {
+         headers: { 'Content-Type': 'application/json' } // Ensure correct header for this call
+    });
+    // ** IMPORTANT: Adjust the expected response structure based on your backend **
+    // Common structure for dj-rest-auth/djoser with JWT might be { access, refresh, user } or just { key } for token auth
+    if (response.data.access && response.data.user) {
+        return { token: response.data.access, user: response.data.user };
+    } else if (response.data.key) { // Example for DRF TokenAuthentication
+         // If only a key is returned, you might need a separate call to get user details
+         console.warn("Login returned only a token key. Implement loadUser separately.");
+         return { token: response.data.key, user: null }; // Adjust as needed
+    } else {
+        throw new Error("Login response did not contain expected token/user data.");
+    }
+};
+
+/**
+ * Registers a new user.
+ * @param {object} userData - { username, email, password, password_confirm } (adjust as needed)
+ * @returns {Promise<object>} - Response data from the backend upon successful registration.
+ * @throws {Error} If registration fails.
+ */
+export const signupUser = async (userData) => {
+    // Assuming signup endpoint is at /auth/register/ relative to AUTH_BASE_URL
+    // Adjust URL path if needed
+    const response = await axios.post(`${AUTH_BASE_URL}/auth/register/`, userData, {
+        headers: { 'Content-Type': 'application/json' }
+    });
+    return response.data;
+};
+
+/**
+ * Fetches details for the currently authenticated user.
+ * Relies on the request interceptor to add the Authorization header.
+ * @returns {Promise<{user: object}>} - Object containing user details.
+ * @throws {Error} If fetching user fails (e.g., token invalid/expired -> 401).
+ */
+export const loadUser = async () => {
+    // Assuming user details endpoint is at /auth/user/ relative to AUTH_BASE_URL
+    // Adjust URL path if needed
+    const response = await apiClient.get(`${AUTH_BASE_URL}/auth/user/`); // apiClient uses interceptor
+    // ** IMPORTANT: Adjust the expected response structure based on your backend **
+    // Usually returns { id, username, email, ... }
+    return { user: response.data };
+};
+
+/**
+ * Placeholder for backend logout (optional).
+ * Frontend logout logic (clearing state/token) is handled elsewhere.
+ */
+export const logoutUser = async () => {
+    // Example: If you have a backend endpoint to invalidate tokens
+    const token = localStorage.getItem('eduagent-refresh-token'); // If using refresh tokens
+    if (token) {
+        try {
+            await axios.post(`${AUTH_BASE_URL}/auth/logout/`, { refresh: token } , {
+                 headers: { 'Content-Type': 'application/json' }
+            });
+        } catch (error) {
+            console.warn("Backend logout call failed:", error);
+        }
+    }
+    console.log("Frontend logout initiated (backend call is optional).");
+    // Actual token/state clearing happens in the reducer/component.
+};
+
+
+
 export const fetchSubjects = async () => {
-    const response = await apiClient.get('/subjects/');
-    return response.data; 
+    const response = await apiClient.get('/subjects/'); // Uses API_BASE_URL
+    return response.data;
 };
 
 export const uploadKnowledgeBase = async (subject, files) => {
@@ -35,48 +217,52 @@ export const uploadKnowledgeBase = async (subject, files) => {
     files.forEach(file => {
         formData.append('files', file);
     });
-
-    
+    // Interceptor will add token if user is logged in
     const response = await apiClient.post(`/subjects/${encodeURIComponent(subject)}/kb/`, formData, {
         headers: {
-            'Content-Type': 'multipart/form-data',
+            // Axios handles Content-Type for FormData automatically, but override if needed
+            // 'Content-Type': 'multipart/form-data', (Usually not needed)
         },
     });
-    return response.data; 
-};
-
-export const fetchChats = async () => {
-    const response = await apiClient.get('/chats/');
-    return response.data; 
-};
-
-export const createChat = async (data) => {
-    
-    const response = await apiClient.post('/chats/', data);
-    return response.data; 
-};
-
-export const fetchChatDetail = async (chatId) => {
-    const response = await apiClient.get(`/chats/${chatId}/`);
-    return response.data; 
-};
-
-export const updateChat = async (chatId, data) => {
-    
-    const response = await apiClient.patch(`/chats/${chatId}/`, data);
-    return response.data; 
-};
-
-export const deleteChat = async (chatId) => {
-    await apiClient.delete(`/chats/${chatId}/`);
-    
-};
-
-export const postQuery = async (data) => {
-    
-    const response = await apiClient.post('/query/', data);
-    
     return response.data;
 };
 
-export default apiClient; 
+export const fetchChats = async () => {
+    // Interceptor will add token
+    const response = await apiClient.get('/chats/');
+    return response.data;
+};
+
+export const createChat = async (data) => {
+    // Interceptor will add token
+    const response = await apiClient.post('/chats/', data);
+    return response.data;
+};
+
+export const fetchChatDetail = async (chatId) => {
+    // Interceptor will add token
+    const response = await apiClient.get(`/chats/${chatId}/`);
+    return response.data;
+};
+
+export const updateChat = async (chatId, data) => {
+    // Interceptor will add token
+    const response = await apiClient.patch(`/chats/${chatId}/`, data);
+    return response.data;
+};
+
+export const deleteChat = async (chatId) => {
+    // Interceptor will add token
+    await apiClient.delete(`/chats/${chatId}/`);
+};
+
+export const postQuery = async (data) => {
+    // Interceptor will add token
+    const response = await apiClient.post('/query/', data);
+    return response.data;
+};
+
+// --- End Existing API Functions ---
+
+
+export default apiClient; // Export the configured Axios instance
