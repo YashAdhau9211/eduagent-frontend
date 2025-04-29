@@ -47,8 +47,7 @@ const SignupPage = () => {
             alert('Registration successful! Please log in.');
             navigate('/login');
         } catch (error) {
-            // Dispatch the error message from the API service
-            // error.message should contain the formatted string from the interceptor
+            
             dispatch({ type: 'AUTH_FAIL', payload: error.message || 'Signup failed' });
         }
     };

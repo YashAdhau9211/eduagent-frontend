@@ -11,7 +11,7 @@ const ChatMessage = ({ message }) => {
     return (
         <div className={`message ${alignClass} ${errorClass}`}>
             <div className="message-content">
-                 {/* Use ReactMarkdown for assistant messages */}
+                 
                  {role === 'assistant' || role === 'system' ? ( // Handle system messages similarly
                     <ReactMarkdown
                         children={content}

@@ -1,32 +1,29 @@
 import axios from 'axios';
 
-// Base URL for your API endpoints (including the /api prefix)
+
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://127.0.0.1:8000/api';
-// Base URL for Auth endpoints (assuming they might be outside /api, adjust if needed)
-// If auth endpoints ARE under /api (e.g., /api/auth/login/), you can just use API_BASE_URL for everything.
+
 const AUTH_BASE_URL = process.env.REACT_APP_AUTH_BASE_URL || 'http://127.0.0.1:8000'; // Example: Root URL
 
 const apiClient = axios.create({
-    // Use API_BASE_URL for general API calls
+    
     baseURL: API_BASE_URL,
     headers: {
         'Content-Type': 'application/json',
     },
 });
 
-// --- Request Interceptor ---
-// Runs before every request is sent
+
 apiClient.interceptors.request.use(
     (config) => {
         // Get the token from localStorage
         const token = localStorage.getItem('eduagent-access-token');
 
-        // Define URLs that should NOT receive the Authorization header
+        
         const publicUrls = [
-            `${AUTH_BASE_URL}/auth/login/`, // Adjust path based on your backend router
-            `${AUTH_BASE_URL}/auth/register/`, // Adjust path based on your backend router
-            // Add refresh token URL if you implement it:
-            // `${AUTH_BASE_URL}/auth/token/refresh/`,
+            `${AUTH_BASE_URL}/auth/login/`, 
+            `${AUTH_BASE_URL}/auth/register/`, 
+            
         ];
 
         // Construct the full URL for comparison
@@ -39,7 +36,7 @@ apiClient.interceptors.request.use(
              console.log(`[API Interceptor] Adding token to request for: ${config.url}`); // Debug log
              config.headers['Authorization'] = `Bearer ${token}`;
         } else {
-            // console.log(`[API Interceptor] No token added for: ${config.url}`); // Debug log
+            console.log(`[API Interceptor] No token added for: ${config.url}`); // Debug log
         }
 
         return config; // Return the modified config
@@ -52,8 +49,7 @@ apiClient.interceptors.request.use(
 );
 
 
-// --- Response Interceptor ---
-// Handles responses globally (keeps existing error formatting)
+
 apiClient.interceptors.response.use(
     response => response, // Pass through successful responses
     error => {
@@ -64,7 +60,7 @@ apiClient.interceptors.response.use(
 
         let errorMessage = "An unexpected error occurred."; // Default message
 
-        // --- Improved Error Message Extraction ---
+        
         if (error.response?.data) {
             const responseData = error.response.data;
 
@@ -109,16 +105,15 @@ apiClient.interceptors.response.use(
                  errorMessage = responseData;
             }
         }
-        // 5. Fallback to generic Axios error message if no response data
+        
         else if (error.message) {
             errorMessage = error.message; // e.g., "Network Error"
         }
-        // --- End Improved Error Message Extraction ---
+        
 
-        // Log the final formatted message for debugging
         console.error("API call error Formatted Message:", errorMessage);
 
-        // Reject the promise with a structured error object including the formatted message
+        
         return Promise.reject({
             message: errorMessage, // Use the extracted/formatted message
             status: error.response?.status,
@@ -128,7 +123,7 @@ apiClient.interceptors.response.use(
 );
 
 
-// --- Authentication API Functions ---
+
 
 /**
  * Logs in a user.
@@ -137,13 +132,11 @@ apiClient.interceptors.response.use(
  * @throws {Error} If login fails.
  */
 export const loginUser = async (credentials) => {
-    // Assuming login endpoint is at /auth/login/ relative to AUTH_BASE_URL
-    // Adjust URL path if your backend structure is different
+    
     const response = await axios.post(`${AUTH_BASE_URL}/auth/login/`, credentials, {
          headers: { 'Content-Type': 'application/json' } // Ensure correct header for this call
     });
-    // ** IMPORTANT: Adjust the expected response structure based on your backend **
-    // Common structure for dj-rest-auth/djoser with JWT might be { access, refresh, user } or just { key } for token auth
+    
     if (response.data.access && response.data.user) {
         return { token: response.data.access, user: response.data.user };
     } else if (response.data.key) { // Example for DRF TokenAuthentication
@@ -157,9 +150,9 @@ export const loginUser = async (credentials) => {
 
 /**
  * Registers a new user.
- * @param {object} userData - { username, email, password, password_confirm } (adjust as needed)
- * @returns {Promise<object>} - Response data from the backend upon successful registration.
- * @throws {Error} If registration fails.
+ * @param {object} userData - 
+ * @returns {Promise<object>} 
+ * @throws {Error} 
  */
 export const signupUser = async (userData) => {
     // Assuming signup endpoint is at /auth/register/ relative to AUTH_BASE_URL
@@ -171,24 +164,17 @@ export const signupUser = async (userData) => {
 };
 
 /**
- * Fetches details for the currently authenticated user.
- * Relies on the request interceptor to add the Authorization header.
- * @returns {Promise<{user: object}>} - Object containing user details.
- * @throws {Error} If fetching user fails (e.g., token invalid/expired -> 401).
+ 
+ * @returns {Promise<{user: object}>} - 
+ * @throws {Error} 
  */
 export const loadUser = async () => {
-    // Assuming user details endpoint is at /auth/user/ relative to AUTH_BASE_URL
-    // Adjust URL path if needed
+    
     const response = await apiClient.get(`${AUTH_BASE_URL}/auth/user/`); // apiClient uses interceptor
-    // ** IMPORTANT: Adjust the expected response structure based on your backend **
-    // Usually returns { id, username, email, ... }
+    
     return { user: response.data };
 };
 
-/**
- * Placeholder for backend logout (optional).
- * Frontend logout logic (clearing state/token) is handled elsewhere.
- */
 export const logoutUser = async () => {
     // Example: If you have a backend endpoint to invalidate tokens
     const token = localStorage.getItem('eduagent-refresh-token'); // If using refresh tokens
@@ -221,15 +207,15 @@ export const uploadKnowledgeBase = async (subject, files) => {
     console.log(`[uploadKnowledgeBase] Uploading ${files.length} files for subject: ${subject}`);
 
     try {
-        // *** Explicitly try overriding Content-Type to let browser set it ***
+        
         const response = await apiClient.post(
             `/subjects/${encodeURIComponent(subject)}/kb/`,
             formData,
             {
                 headers: {
-                    // Setting to undefined or null might force browser/axios default for FormData
+                    
                     'Content-Type': undefined
-                    // OR try: 'Content-Type': null
+                    
                 }
             }
         );
@@ -278,7 +264,7 @@ export const postQuery = async (data) => {
     return response.data;
 };
 
-// --- End Existing API Functions ---
 
 
-export default apiClient; // Export the configured Axios instance
+
+export default apiClient; 
