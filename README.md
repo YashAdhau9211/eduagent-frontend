@@ -1,70 +1,89 @@
-# Getting Started with Create React App
+# EduAgent.ai - Frontend (React)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+[![React](https://img.shields.io/badge/React-18+-61DAFB?logo=react&logoColor=white)](https://reactjs.org/)
+[![Axios](https://img.shields.io/badge/axios-^1.0.0-purple)](https://axios-http.com/)
+[![React Router](https://img.shields.io/badge/React_Router-v6-CA4245?logo=react-router)](https://reactrouter.com/)
+[![CSS](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-## Available Scripts
+This repository contains the React.js frontend code for **EduAgent.ai**, an AI-powered tutoring platform.
 
-In the project directory, you can run:
+> **Backend Repo:** [Link to the EduAgent.ai Backend GitHub repository]
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 🚀 Overview
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+EduAgent.ai is a multi-source AI tutor platform. The frontend allows users to:
 
-### `npm test`
+- Sign up / Log in
+- Choose a subject
+- Upload PDFs to build a knowledge base
+- Chat with an AI tutor using subject-specific context
+- View multi-source responses (RAG from PDFs, LLMs, Web Search)
+- Switch between light and dark mode
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+This React app interacts with a Django/DRF backend for authentication and AI responses.
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## ✨ Features
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- **Authentication:** Secure login/signup with protected routes.
+- **Subject Selection:** Dropdown to select subject context.
+- **PDF Upload:** Upload PDFs to generate a Knowledge Base.
+- **Chat Management:** Create, select, and delete chat sessions.
+- **Chat UI:**
+  - Markdown-based AI responses
+  - Code highlighting
+  - Input with Enter to send / Shift+Enter for newline
+- **Multi-Source Tabs:** View answer components via tabs - `FINAL`, `RAG`, `LLM`, `WEB`, `SOURCES`.
+- **State Management:** React Context API + `useReducer`
+- **Theming:** Light/Dark mode with CSS variables and `localStorage`
+- **API Integration:** Axios with interceptors and JWT token handling
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## 🧱 Tech Stack
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- **React 18+**
+- **React Router v6**
+- **Axios**
+- **React Context + useReducer**
+- **react-markdown**
+- **react-syntax-highlighter**
+- **CSS Variables**
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 📁 Project Structure
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+src/
+├── components/ # UI Components organized by feature/area
+│ ├── Auth/ # Login, Signup, ProtectedRoute
+│ ├── Sidebar/ # Sidebar and its contents
+│ ├── ChatWindow/ # Chat area and its contents
+│ └── common/ # Reusable components (Spinner, ErrorDisplay)
+├── context/ # React Context, Reducer, Initial State
+├── hooks/ # Custom hooks (e.g., useScrollToBottom)
+├── services/ # API interaction layer (api.js using axios)
+├── App.css # Global styles and CSS Variables
+├── App.js # Main application component with routing setup
+└── index.js # Entry point
 
-## Learn More
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+---
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 🛠️ Getting Started
 
-### Code Splitting
+### Prerequisites
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- Node.js v16+ and npm or yarn
+- A running instance of the [EduAgent.ai Backend](link-to-your-backend-repo)
 
-### Analyzing the Bundle Size
+### Installation
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```bash
+git clone <repository-url>
+cd eduagent-frontend
+npm install   # or yarn install
