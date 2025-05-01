@@ -79,7 +79,7 @@ src/
 ### Prerequisites
 
 - Node.js v16+ and npm or yarn
-- A running instance of the [EduAgent.ai Backend](link-to-your-backend-repo)
+- A running instance of the [EduAgent.ai Backend](https://github.com/YashAdhau9211/eduagent_backend)
 
 ### Installation
 
