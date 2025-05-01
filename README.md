@@ -57,7 +57,7 @@ This React app interacts with a Django/DRF backend for authentication and AI res
 ---
 
 ## 📁 Project Structure
-
+```bash
 src/
 ├── components/ # UI Components organized by feature/area
 │ ├── Auth/ # Login, Signup, ProtectedRoute
@@ -70,7 +70,7 @@ src/
 ├── App.css # Global styles and CSS Variables
 ├── App.js # Main application component with routing setup
 └── index.js # Entry point
-
+```
 
 ---
 
